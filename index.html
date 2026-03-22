@@ -269,13 +269,18 @@ document.getElementById("warning").innerText = warning;
 function predict(choice) {
   if (choice === "decrease") {
     document.getElementById("feedback").innerText = "Correct! More moisture reduces efficiency.";
-  } else {
-    document.getElementById("feedback").innerText = "Not quite. Moisture lowers efficiency because energy is used to evaporate water.";
+  } if (choice === "increase") {
+    document.getElementById("feedback").innerText = "Incorrect! Try Again.";
   }
+  
   if (choice === "pyrolysis") {
     document.getElementById("feedback2").innerText = "Correct!";
-  } else {
-    document.getElementById("feedback2").innerText = "Not quite.Try again.";
+  }  
+  if (choice === "gasification") {
+    document.getElementById("feedback2").innerText = "Incorrect! Requires controlled oxygen";
+  }
+  if (choice === "incineration") {
+    document.getElementById("feedback2").innerText = "Incorrect! Requires controlled oxygen";
   }
 }
 
