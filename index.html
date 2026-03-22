@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waste-to-Energy Simulation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    h1 { color: #333; }
+
+    .card {
+      background: white;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: white;
+      transition: 3s;
+    }
+    button:hover { background-color: #45a049; }
+
+    .bar {
+      height: 20px;
+      background: green;
+      margin-top: 10px;
+      border-radius: 10px;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .step {
+      padding: 8px;
+      margin: 5px 0;
+      background: #e0e0e0;
+      border-radius: 5px;
+    }
+
+    label { font-weight: bold; }
+    input[type=range] { width: 100%; }
+  </style>
+</head>
+<body>
+
+<h1>Waste-to-Energy Simulation</h1>
+<div id="mainContent">
+<!-- Process Selection -->
+<div class="card">
+  <h2>Select Process or View Real Life Examples</h2>
+  <button onclick="setProcess('incineration')">Incineration</button>
+  <button onclick="setProcess('pyrolysis')">Pyrolysis</button>
+  <button onclick="setProcess('gasification')">Gasification</button>
+  <button onclick="showRealWorld()">Real-World Application + Environmental Impacts</button>
+  <p id="description"></p>
+</div>
+
+<!-- Process Steps -->
+<div class="card">
+  <h2>Process Steps</h2>
+  <div id="steps"></div>
+</div>
+
+<!-- Variable Sliders -->
+<div class="card">
+  <h2>Adjust Variables & scroll down to see how it affects the results!</h2>
+  <label>Temperature: <span id="tempVal">500</span>°C</label>
+  <input type="range" id="temp" min="100" max="1000" value="500"><br><br>
+
+  <label>Oxygen: <span id="oxyVal">50</span>%</label>
+  <input type="range" id="oxy" min="0" max="100" value="50"><br><br>
+
+  <label>Moisture: <span id="moistVal">20</span>%</label>
+  <input type="range" id="moist" min="0" max="100" value="20">
+</div>
+
+<!-- Results -->
+<div class="card">
+  <h2>Results</h2>
+  <p id="warning" style="color:red; font-weight:bold;"></p>
+  <p>Efficiency: <span id="efficiency">0</span>%</p>
+  <div class="bar" id="bar"></div>
+
+  <h3>Energy Output</h3>
+  <p>Heat: <span id="heat">0</span>%</p>
+  <p>Electricity: <span id="electric">0</span>%</p>
+  <p>Fuel: <span id="fuel">0</span>%</p>
+</div>
+
+<!-- Prediction -->
+<div class="card">
+  <h2>Prediction</h2>
+  <p>If moisture increases, what happens to efficiency?</p>
+  <button onclick="predict('increase')">Increase</button>
+  <button onclick="predict('decrease')">Decrease</button>
+  <p id="feedback"></p>
+</div>
+</div> <!-- End of mainContent -->
+
+<!-- Real-World Section -->
+<div class="card" id="realWorldSection" style="display:none;">
+  <h1>Real-World Waste-to-Energy Systems & Sustainability</h1>
+<button onclick="backToSimulation()">Back</button>
+  <h2>pros</h2>
+  <u1>
+    <li>  decreases methane emissions by diverting waste from landfills</li>
+    <li>  if implemented on a smaller scale, can help remote/low income communities</li>
+    <li>  reduces harmful waste that otherwise ends up in the ocean</li>
+    <li>  reduce reliance on fossil fuels</li>
+  </u1>
+
+  <h2>cons</h2>
+  <u1>
+    <li>  still carries risk of air pollution if not properly controlled</li>
+    <li>  high cost-- requires skilled operation and frequent maintenance</li>
+    <li>  energy efficiency varies-- some process are still less efficient than direct fossil fuel energy</li>
+    <li>  produces ash, char, or tar that must be safely discarded</li>
+  </u1>
+
+  <h3>Examples:</h3>
+  <p> Enexor BioEnergy located in Tennessee-- gasification </p>
+    <img src="https://framerusercontent.com/images/DrVx2G5qjzeStjLwWLPcz67IU.webp?width=2100&height=1200" width="300">
+  <p> Dublin, Ireland Facility Poolbeg Incinerator -- incineration</p>
+   <img src="https://waste-management-world.com/imager/media/wasteManagementWorld/6816392/kanadevia-inova-waste-to-energy-plant-dublin-ireland-teaser_428fd902f4247199467725e7eccf1673.jpg" width="300">
+  <p>Brightmark Energy located in the U.S -- pyrolysis</p>
+  <img src="https://bmadmin.brightmark.com/wp-content/uploads/2021/12/A9A8138-scaled.jpg" width="300">
+  
+</div>
+  
+
+<script>
+let process = "incineration";
+
+const processes = {
+  incineration: {
+    base: 80,
+    desc: "Burning waste with oxygen to produce heat and electricity.",
+    steps: ["Waste Input", "Combustion", "Heat", "Steam Turbine", "Electricity"]
+  },
+  pyrolysis: {
+    base: 65,
+    desc: "Heating waste without oxygen to produce biofuel.",
+    steps: ["Waste Input", "Heating (No Oxygen)", "Breakdown", "Produce Char + Bio-oil + Gas"]
+  },
+  gasification: {
+    base: 70,
+    desc: "Partial oxidation to produce syngas.",
+    steps: ["Waste Input", "Limited Oxygen", "Gas Formation", "Syngas-- can be converted to fuels or burned through combustion to generate heat/electricty"]
+  }
+};
+
+function setProcess(p) {
+  // Hide real-world section
+  document.getElementById("realWorldSection").style.display = "none";
+  // Show main content
+  document.getElementById("mainContent").style.display = "block";
+
+  process = p;
+  document.getElementById("description").innerText = processes[p].desc;
+
+  let stepsHTML = "";
+  processes[p].steps.forEach(s => {
+    stepsHTML += `<div class="step">${s}</div>`;
+  });
+  document.getElementById("steps").innerHTML = stepsHTML;
+
+  if (p === "pyrolysis") {
+    document.getElementById("oxy").disabled = true;
+  } else {
+    document.getElementById("oxy").disabled = false;
+  }
+  update();
+}
+
+
+function update() {
+  const temp = Number(document.getElementById("temp").value);
+  const oxy = Number(document.getElementById("oxy").value);
+  const moist = Number(document.getElementById("moist").value);
+
+  document.getElementById("tempVal").innerText = temp;
+  document.getElementById("oxyVal").innerText = oxy;
+  document.getElementById("moistVal").innerText = moist;
+
+  let efficiency = 0;
+
+  if (process === "pyrolysis") {
+    let tempFactor =
+      temp >= 400 && temp <= 700
+        ? 1
+        : 1 - Math.abs(temp - 550) / 800;
+
+    efficiency =
+      processes[process].base *
+      tempFactor *
+      (1 - moist / 100);
+
+  } else if (process === "gasification") {
+    let tempFactor =
+      temp >= 700 && temp <= 1200
+        ? 1
+        : 1 - Math.abs(temp - 950) / 1200;
+
+    let oxygenFactor = oxy / 100;
+
+    efficiency =
+      processes[process].base *
+      tempFactor *
+      oxygenFactor *
+      (1 - moist / 100);
+
+  } else {
+    let tempFactor = temp / 1000;
+    let oxygenFactor = oxy / 100;
+
+    efficiency =
+      processes[process].base *
+      tempFactor *
+      oxygenFactor *
+      (1 - moist / 100);
+  }
+
+  efficiency = Math.max(0, Math.min(100, Math.round(efficiency)));
+
+  document.getElementById("efficiency").innerText = efficiency;
+  document.getElementById("bar").style.width = efficiency + "%";
+
+  document.getElementById("heat").innerText = Math.round(efficiency * 0.5);
+  document.getElementById("electric").innerText = Math.round(efficiency * 0.3);
+  document.getElementById("fuel").innerText = Math.round(efficiency * 0.2);
+
+  let warning = "";
+
+if (process === "pyrolysis" && (temp < 400 || temp > 700)) {
+  warning = "⚠️ Temperature outside optimal range for pyrolysis (400–700°C)!";
+}
+
+if (process === "gasification" && (temp < 700 || temp > 1200)) {
+  warning = "⚠️ Temperature outside optimal range for gasification (700–1200°C)!";
+}
+
+if (process === "incineration" && (temp < 850 || temp > 1100)) {
+  warning = "⚠️ Temperature must be within optimal range for incineration (850–1100°C) to ensure complete combustion and reduce harmful emissions";
+}
+
+document.getElementById("warning").innerText = warning;
+}
+
+
+function predict(choice) {
+  if (choice === "decrease") {
+    document.getElementById("feedback").innerText = "Correct! More moisture reduces efficiency.";
+  } else {
+    document.getElementById("feedback").innerText = "Not quite. Moisture lowers efficiency because energy is used to evaporate water.";
+  }
+}
+
+// Attach slider events
+document.getElementById("temp").oninput = update;
+document.getElementById("oxy").oninput = update;
+document.getElementById("moist").oninput = update;
+
+// Initialize default process
+setProcess("incineration");
+
+function showRealWorld() {
+  // Hide main content
+  document.getElementById("mainContent").style.display = "none";
+  // Show only the real-world section
+  const section = document.getElementById("realWorldSection");
+  section.style.display = "block";
+  section.scrollIntoView({ behavior: "smooth" });
+}
+
+function backToSimulation() {
+  document.getElementById("realWorldSection").style.display = "none";
+  document.getElementById("mainContent").style.display = "block";
+}
+</script>
+
+</body>
+</html>
