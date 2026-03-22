@@ -106,12 +106,6 @@
   <button onclick="predict('decrease')">Decrease</button>
   <p id="feedback"></p>
   
-  <h2>Prediction</h2>
-  <p> what process doesn't require the use of oxygen?</p>
-  <button onclick="predict('pyrolysis')">pyrolysis</button>
-  <button onclick="predict('gasification')">gasification</button>
-  <button onclick="predict('incineration')">incineration</button>
-  <p id="feedback2"></p>
 </div>
   
 </div> <!-- End of mainContent -->
@@ -269,18 +263,8 @@ document.getElementById("warning").innerText = warning;
 function predict(choice) {
   if (choice === "decrease") {
     document.getElementById("feedback").innerText = "Correct! More moisture reduces efficiency.";
-  } if (choice === "increase") {
-    document.getElementById("feedback").innerText = "Incorrect! Try Again.";
-  }
-  
-  if (choice === "pyrolysis") {
-    document.getElementById("feedback2").innerText = "Correct!";
-  }  
-  if (choice === "gasification") {
-    document.getElementById("feedback2").innerText = "Incorrect! Requires controlled oxygen";
-  }
-  if (choice === "incineration") {
-    document.getElementById("feedback2").innerText = "Incorrect! Requires controlled oxygen";
+  } else {
+    document.getElementById("feedback").innerText = "Not quite. Moisture lowers efficiency because energy is used to evaporate water.";
   }
 }
 
